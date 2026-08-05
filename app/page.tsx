@@ -20,6 +20,27 @@ const normalizeArrayText = (text: string) =>
     .map((item) => item.trim())
     .filter((item) => item.length > 0);
 
+async function parseJsonResponse<T = any>(
+  response: Response,
+): Promise<T | null> {
+  const contentType = response.headers.get("content-type") ?? "";
+  if (!contentType.includes("application/json")) {
+    const text = await response.text();
+    return text ? ({ rawText: text } as unknown as T) : null;
+  }
+
+  const text = await response.text();
+  if (!text) {
+    return null;
+  }
+
+  try {
+    return JSON.parse(text) as T;
+  } catch {
+    return { rawText: text } as unknown as T;
+  }
+}
+
 const themeStyles: Record<string, React.CSSProperties> = {
   page: { backgroundColor: "#0f172a", color: "#f8fafc", minHeight: "100vh" },
   card: {
@@ -78,7 +99,7 @@ export default function AdminPage() {
       }
 
       try {
-        const token = await currentUser.getIdToken();
+        const token = await currentUser.getIdToken(true);
         const response = await fetch("/api/admin/check", {
           method: "GET",
           headers: {
@@ -102,7 +123,7 @@ export default function AdminPage() {
     if (!currentUser) {
       throw new Error("User not signed in");
     }
-    return currentUser.getIdToken();
+    return currentUser.getIdToken(true);
   };
 
   const signIn = async () => {
@@ -147,9 +168,19 @@ export default function AdminPage() {
         },
       });
 
-      const data = (await response.json()) as CreatePuzzleResponse | ApiError;
+      const data = (await parseJsonResponse<CreatePuzzleResponse | ApiError>(
+        response,
+      )) ?? {
+        error: `Unexpected empty response (${response.status})`,
+      };
       if (!response.ok) {
-        setError((data as ApiError).error ?? "Failed to create puzzle.");
+        const message =
+          (data as ApiError).error ??
+          (typeof data === "object" && "rawText" in data
+            ? data.rawText
+            : null) ??
+          "Failed to create puzzle.";
+        setError(String(message));
         return;
       }
 
@@ -190,9 +221,20 @@ export default function AdminPage() {
         body: JSON.stringify({ count: value }),
       });
 
-      const data = await response.json();
+      const data = (await parseJsonResponse<{
+        message?: string;
+        error?: string;
+      }>(response)) ?? {
+        error: `Unexpected empty response (${response.status})`,
+      };
       if (!response.ok) {
-        setError(data.error ?? "Failed to delete puzzles.");
+        const message =
+          data.error ??
+          (typeof data === "object" && "rawText" in data
+            ? data.rawText
+            : null) ??
+          "Failed to delete puzzles.";
+        setError(String(message));
         return;
       }
 
