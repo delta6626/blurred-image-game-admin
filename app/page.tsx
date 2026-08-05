@@ -20,6 +20,36 @@ const normalizeArrayText = (text: string) =>
     .map((item) => item.trim())
     .filter((item) => item.length > 0);
 
+const themeStyles: Record<string, React.CSSProperties> = {
+  page: { backgroundColor: "#0f172a", color: "#f8fafc", minHeight: "100vh" },
+  card: {
+    backgroundColor: "#111f3d",
+    color: "#f8fafc",
+    border: "1px solid #334155",
+  },
+  primaryButton: {
+    backgroundColor: "#2563eb",
+    color: "#ffffff",
+    border: "1px solid #1d4ed8",
+  },
+  secondaryButton: {
+    backgroundColor: "#1e293b",
+    color: "#f8fafc",
+    border: "1px solid #475569",
+  },
+  input: {
+    backgroundColor: "#0a1225",
+    color: "#f8fafc",
+    border: "1px solid #475569",
+  },
+  textarea: {
+    backgroundColor: "#0a1225",
+    color: "#f8fafc",
+    border: "1px solid #475569",
+  },
+  helpText: { color: "#cbd5e1" },
+};
+
 export default function AdminPage() {
   const [user, setUser] = useState(auth.currentUser);
   const [loading, setLoading] = useState(true);
@@ -59,9 +89,9 @@ export default function AdminPage() {
         setIsAdmin(response.ok);
       } catch {
         setIsAdmin(false);
+      } finally {
+        setLoading(false);
       }
-
-      setLoading(false);
     });
 
     return () => unsubscribe();
@@ -177,10 +207,16 @@ export default function AdminPage() {
 
   if (!isFirebaseConfigured) {
     return (
-      <main className="min-h-screen flex items-center justify-center p-8">
-        <div className="prose">
+      <main
+        style={themeStyles.page}
+        className="flex items-center justify-center p-8"
+      >
+        <div
+          style={themeStyles.card}
+          className="prose rounded-3xl p-8 shadow-lg"
+        >
           <h1>Admin form</h1>
-          <p>
+          <p style={themeStyles.helpText}>
             Firebase client configuration is missing. Please set the required
             <code> NEXT_PUBLIC_FIREBASE_* </code> environment variables.
           </p>
@@ -191,7 +227,10 @@ export default function AdminPage() {
 
   if (loading) {
     return (
-      <main className="min-h-screen flex items-center justify-center p-8">
+      <main
+        style={themeStyles.page}
+        className="flex items-center justify-center p-8"
+      >
         <p>Loading...</p>
       </main>
     );
@@ -199,21 +238,28 @@ export default function AdminPage() {
 
   if (!user) {
     return (
-      <main className="min-h-screen flex items-center justify-center p-8">
-        <div className="max-w-xl w-full rounded-2xl border border-slate-200 p-8 shadow-lg">
+      <main
+        style={themeStyles.page}
+        className="flex items-center justify-center p-8"
+      >
+        <div
+          style={themeStyles.card}
+          className="max-w-xl w-full rounded-2xl p-8 shadow-lg"
+        >
           <h1 className="text-2xl font-semibold mb-4">Admin Sign In</h1>
-          <p className="mb-6">
+          <p style={themeStyles.helpText} className="mb-6">
             Sign in with your Firebase admin account to access the puzzle
             creator.
           </p>
           <button
             type="button"
             onClick={signIn}
-            className="rounded-md bg-slate-900 px-4 py-2 text-white hover:bg-slate-700"
+            style={themeStyles.primaryButton}
+            className="rounded-md px-4 py-2"
           >
             Sign in with Google
           </button>
-          {error ? <p className="mt-4 text-red-600">{error}</p> : null}
+          {error ? <p className="mt-4 text-red-400">{error}</p> : null}
         </div>
       </main>
     );
@@ -221,16 +267,23 @@ export default function AdminPage() {
 
   if (isAdmin === false) {
     return (
-      <main className="min-h-screen flex items-center justify-center p-8">
-        <div className="max-w-xl w-full rounded-2xl border border-slate-200 p-8 shadow-lg">
+      <main
+        style={themeStyles.page}
+        className="flex items-center justify-center p-8"
+      >
+        <div
+          style={themeStyles.card}
+          className="max-w-xl w-full rounded-2xl p-8 shadow-lg"
+        >
           <h1 className="text-2xl font-semibold mb-4">Access Denied</h1>
-          <p className="mb-6 text-slate-700">
+          <p style={themeStyles.helpText} className="mb-6">
             Your account is not authorized to access the admin panel.
           </p>
           <button
             type="button"
             onClick={signOutUser}
-            className="rounded-md bg-slate-900 px-4 py-2 text-white hover:bg-slate-700"
+            style={themeStyles.primaryButton}
+            className="rounded-md px-4 py-2"
           >
             Sign out
           </button>
@@ -240,24 +293,25 @@ export default function AdminPage() {
   }
 
   return (
-    <main className="min-h-screen bg-slate-50 p-6">
+    <main style={themeStyles.page} className="p-6">
       <div className="mx-auto max-w-4xl space-y-8">
-        <header className="rounded-3xl bg-white p-8 shadow-lg">
+        <header style={themeStyles.card} className="rounded-3xl p-8 shadow-lg">
           <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
             <div>
               <h1 className="text-3xl font-semibold">Blurred Admin</h1>
-              <p className="mt-2 text-sm text-slate-600">
+              <p style={themeStyles.helpText} className="mt-2 text-sm">
                 Create puzzles and delete oldest images from storage.
               </p>
             </div>
             <div className="flex items-center gap-3">
-              <p className="text-sm text-slate-700">
+              <p style={themeStyles.helpText} className="text-sm">
                 Signed in as {user.email}
               </p>
               <button
                 type="button"
                 onClick={signOutUser}
-                className="rounded-md border border-slate-300 bg-white px-3 py-2 text-sm hover:bg-slate-100"
+                style={themeStyles.secondaryButton}
+                className="rounded-md px-3 py-2 text-sm"
               >
                 Sign out
               </button>
@@ -265,7 +319,7 @@ export default function AdminPage() {
           </div>
         </header>
 
-        <section className="rounded-3xl bg-white p-8 shadow-lg">
+        <section style={themeStyles.card} className="rounded-3xl p-8 shadow-lg">
           <h2 className="text-2xl font-semibold mb-4">Create new puzzle</h2>
           <form onSubmit={submitPuzzle} className="space-y-6">
             <label className="block space-y-2">
@@ -277,7 +331,8 @@ export default function AdminPage() {
                   const file = event.target.files?.[0] ?? null;
                   setImageFile(file);
                 }}
-                className="block w-full rounded-lg border border-slate-300 bg-white px-3 py-2"
+                style={themeStyles.input}
+                className="block w-full rounded-lg px-3 py-2"
               />
             </label>
             <label className="block space-y-2">
@@ -286,7 +341,8 @@ export default function AdminPage() {
                 type="text"
                 value={answer}
                 onChange={(event) => setAnswer(event.target.value)}
-                className="block w-full rounded-lg border border-slate-300 bg-white px-3 py-2"
+                style={themeStyles.input}
+                className="block w-full rounded-lg px-3 py-2"
                 placeholder="Eiffel Tower"
                 required
               />
@@ -296,11 +352,12 @@ export default function AdminPage() {
               <textarea
                 value={acceptedAnswers}
                 onChange={(event) => setAcceptedAnswers(event.target.value)}
-                className="block w-full rounded-lg border border-slate-300 bg-white px-3 py-2"
+                style={themeStyles.textarea}
+                className="block w-full rounded-lg px-3 py-2"
                 placeholder="the eiffel tower, tour eiffel"
                 rows={4}
               />
-              <p className="text-sm text-slate-500">
+              <p style={themeStyles.helpText} className="text-sm">
                 Use commas or new lines to separate variants.
               </p>
             </label>
@@ -310,26 +367,28 @@ export default function AdminPage() {
                 type="text"
                 value={category}
                 onChange={(event) => setCategory(event.target.value)}
-                className="block w-full rounded-lg border border-slate-300 bg-white px-3 py-2"
+                style={themeStyles.input}
+                className="block w-full rounded-lg px-3 py-2"
                 placeholder="landmark"
               />
             </label>
             <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
               <button
                 type="submit"
-                className="rounded-md bg-slate-900 px-5 py-3 text-white hover:bg-slate-700"
+                style={themeStyles.primaryButton}
+                className="rounded-md px-5 py-3"
               >
                 Create puzzle
               </button>
-              <p className="text-sm text-slate-500">
+              <p style={themeStyles.helpText} className="text-sm">
                 Upload generates all blur variants server-side.
               </p>
             </div>
           </form>
-          {result ? <p className="mt-4 text-green-700">{result}</p> : null}
+          {result ? <p className="mt-4 text-green-400">{result}</p> : null}
         </section>
 
-        <section className="rounded-3xl bg-white p-8 shadow-lg">
+        <section style={themeStyles.card} className="rounded-3xl p-8 shadow-lg">
           <h2 className="text-2xl font-semibold mb-4">Delete oldest puzzles</h2>
           <form onSubmit={submitDelete} className="space-y-4">
             <label className="block space-y-2">
@@ -339,21 +398,27 @@ export default function AdminPage() {
                 min={1}
                 value={deleteCount}
                 onChange={(event) => setDeleteCount(event.target.value)}
-                className="block w-full rounded-lg border border-slate-300 bg-white px-3 py-2"
+                style={themeStyles.input}
+                className="block w-full rounded-lg px-3 py-2"
                 placeholder="50"
               />
             </label>
             <button
               type="submit"
-              className="rounded-md bg-red-600 px-5 py-3 text-white hover:bg-red-500"
+              style={{
+                ...themeStyles.primaryButton,
+                backgroundColor: "#dc2626",
+                border: "1px solid #b91c1c",
+              }}
+              className="rounded-md px-5 py-3"
             >
               Delete oldest puzzles
             </button>
           </form>
           {deleteResult ? (
-            <p className="mt-4 text-green-700">{deleteResult}</p>
+            <p className="mt-4 text-green-400">{deleteResult}</p>
           ) : null}
-          {error ? <p className="mt-4 text-red-600">{error}</p> : null}
+          {error ? <p className="mt-4 text-red-400">{error}</p> : null}
         </section>
       </div>
     </main>
